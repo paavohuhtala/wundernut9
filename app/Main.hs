@@ -6,5 +6,5 @@ import Lib
 main :: IO ()
 main = do
   patterns <- loadLines "./patterns.txt"
-  let outputLines = fmap (iterateUntilPattern Set.empty) patterns
-  mapM_ putStrLn outputLines
+  let outputLines = fmap (\p -> iterateUntilPattern Set.empty p >>= putStrLn) patterns
+  sequence_ outputLines

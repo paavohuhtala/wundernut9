@@ -67,15 +67,22 @@ detectPattern _ _ = Nothing
 depthLimit :: Int
 depthLimit = 100
 
-iterateUntilPattern :: Set.Set Line -> Line -> String
-iterateUntilPattern prevs line =
+debugPrintLine = putStrLn . formatLine
+  where
+    formatLine = fmap formatCell
+    formatCell Blank = '.'
+    formatCell Filled = '#'
+
+iterateUntilPattern :: Set.Set Line -> Line -> IO String
+iterateUntilPattern prevs _ | length prevs >= depthLimit = return "other"
+iterateUntilPattern prevs line = do
+  debugPrintLine line
   case pattern of
-    Just Vanishing                     -> "vanishing"
-    Just Blinking                      -> "blinking"
-    Just Gliding                       -> "gliding" 
-    _ | length nextPrevs == depthLimit -> "other"
+    Just Vanishing                     -> return "vanishing"
+    Just Blinking                      -> return "blinking"
+    Just Gliding                       -> return "gliding" 
     _                                  -> iterateUntilPattern nextPrevs next
   where
     next      = nextLine line
     nextPrevs = Set.insert line prevs
-    pattern   = detectPattern nextPrevs next
+    pattern   = detectPattern prevs line
