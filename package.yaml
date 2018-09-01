@@ -8,7 +8,7 @@ copyright:           "2018 Author name here"
 
 extra-source-files:
 - README.md
-- ChangeLog.md
+- patterns.txt
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -24,6 +24,8 @@ dependencies:
 
 library:
   source-dirs: src
+  dependencies:
+  - containers
 
 executables:
   wundernut9-exe:
@@ -34,6 +36,7 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - containers
     - wundernut9
 
 tests:
@@ -47,4 +50,5 @@ tests:
     dependencies:
     - hspec
     - QuickCheck
+    - containers
     - wundernut9

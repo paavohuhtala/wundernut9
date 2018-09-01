@@ -1,5 +1,6 @@
 import Test.Hspec
 import Test.QuickCheck
+import qualified Data.Set as Set
 import Lib
 
 instance Arbitrary Cell where
@@ -69,21 +70,21 @@ main = hspec $ do
 
   describe "detectPattern" $ do
     it "vanishing sample" $ do
-      detectPattern [
+      detectPattern (Set.fromList [
         [Blank, Blank, Filled, Blank, Blank],
-        [Blank, Filled, Blank, Filled, Blank] ]
+        [Blank, Filled, Blank, Filled, Blank] ])
         [Blank, Blank, Blank, Blank, Blank]
       `shouldBe` Just Vanishing
 
     it "blinking sample" $ do
-      detectPattern [
+      detectPattern (Set.fromList [
         [Blank, Filled, Blank, Filled, Filled, Blank, Blank],
-        [Blank, Blank, Filled, Filled, Blank, Filled, Blank] ]
+        [Blank, Blank, Filled, Filled, Blank, Filled, Blank] ])
         [Blank, Filled, Blank, Filled, Filled, Blank, Blank]
       `shouldBe` Just Blinking
 
     it "gliding sample" $ do
-      detectPattern [
-        [Blank, Filled, Blank, Filled, Filled, Filled, Blank, Blank] ]
+      detectPattern (Set.fromList [
+        [Blank, Filled, Blank, Filled, Filled, Filled, Blank, Blank] ])
         [Blank, Blank, Filled, Blank, Filled, Filled, Filled, Blank]
       `shouldBe` Just Gliding

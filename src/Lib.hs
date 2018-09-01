@@ -12,9 +12,10 @@ module Lib
     ) where
 
 import Data.List
+import qualified Data.Set as Set
 import Control.Arrow
 
-data Cell = Filled | Blank deriving (Show, Eq)
+data Cell = Filled | Blank deriving (Show, Eq, Ord)
 
 isFilled Filled = True
 isFilled Blank = False
@@ -55,18 +56,18 @@ shiftLeft xs n = take (length xs) $ drop n xs ++ repeat Blank
 shiftRight :: [Cell] -> Int -> [Cell]
 shiftRight xs n = take (length xs) $ replicate n Blank ++ xs
 
-detectPattern :: [[Cell]] -> [Cell] -> Maybe Pattern
-detectPattern _     xs | all (==Blank) xs                     = Just Vanishing
-detectPattern prevs xs | elem xs prevs                        = Just Blinking
-detectPattern prevs xs | any (\sxs -> elem sxs prevs) shifted = Just Gliding
+detectPattern :: Set.Set [Cell] -> [Cell] -> Maybe Pattern
+detectPattern _     xs | all (==Blank) xs                 = Just Vanishing
+detectPattern prevs xs | Set.member xs prevs              = Just Blinking
+detectPattern prevs xs | not $ Set.disjoint prevs shifted = Just Gliding
   where 
-    shifted = nub . concat $ [[shiftLeft xs n, shiftRight xs n] | n <- [0..length xs - 1]]
-detectPattern _     _                                         = Nothing
+    shifted = Set.fromList $ [0..length xs - 1] >>= (\n -> [shiftLeft xs n, shiftRight xs n])
+detectPattern _ _ = Nothing
 
 depthLimit :: Int
 depthLimit = 100
 
-iterateUntilPattern :: [[Cell]] -> [Cell] -> String
+iterateUntilPattern :: Set.Set [Cell] -> [Cell] -> String
 iterateUntilPattern prevs line =
   case pattern of
     Just Vanishing                     -> "vanishing"
@@ -76,5 +77,5 @@ iterateUntilPattern prevs line =
     _                                  -> iterateUntilPattern nextPrevs next
   where
     next      = nextLine line
-    nextPrevs = line : prevs
-    pattern   = detectPattern nextPrevs next 
+    nextPrevs = Set.insert line prevs
+    pattern   = detectPattern nextPrevs next
