@@ -74,17 +74,17 @@ main = hspec $ do
         [Blank, Blank, Filled, Blank, Blank],
         [Blank, Filled, Blank, Filled, Blank] ])
         [Blank, Blank, Blank, Blank, Blank]
-      `shouldBe` Just Vanishing
+      `shouldBe` Vanishing
 
     it "blinking sample" $ do
       detectPattern (Set.fromList [
         [Blank, Filled, Blank, Filled, Filled, Blank, Blank],
         [Blank, Blank, Filled, Filled, Blank, Filled, Blank] ])
         [Blank, Filled, Blank, Filled, Filled, Blank, Blank]
-      `shouldBe` Just Blinking
+      `shouldBe` Blinking
 
     it "gliding sample" $ do
       detectPattern (Set.fromList [
         [Blank, Filled, Blank, Filled, Filled, Filled, Blank, Blank] ])
         [Blank, Blank, Filled, Blank, Filled, Filled, Filled, Blank]
-      `shouldBe` Just Gliding
+      `shouldBe` Gliding

@@ -8,7 +8,7 @@ module Lib
         shiftLeft,
         shiftRight,
         detectPattern,
-        iterateUntilPattern
+        evolveUntilPattern
     ) where
 
 import Data.List
@@ -17,9 +17,6 @@ import Control.Arrow
 
 data Cell = Filled | Blank deriving (Show, Eq, Ord)
 type Line = [Cell] 
-
-isFilled Filled = True
-isFilled Blank = False
 
 decodeCell :: Char -> Cell
 decodeCell '#' = Filled
@@ -33,7 +30,7 @@ loadLines = readFile >>> fmap (lines >>> fmap decodeLine)
 
 countNeighbors :: Line -> [Int]
 countNeighbors xs = [
-  length [ () | i <- [n - 2..n + 2], inRange i, i /= n, isFilled (xs !! i) ]
+  length [ () | i <- [n - 2..n + 2], inRange i, i /= n, xs !! i == Filled ]
               | n <- [0..len - 1] ]
   where
     len = length xs
@@ -48,7 +45,13 @@ nextCell _           = Blank
 nextLine :: Line -> Line
 nextLine xs = fmap nextCell $ zip xs $ countNeighbors xs
 
-data Pattern = Blinking | Gliding | Vanishing deriving (Show, Eq)
+data Pattern = Blinking | Gliding | Vanishing | Other deriving Eq
+
+instance Show Pattern where
+  show Blinking = "blinking"
+  show Gliding = "gliding"
+  show Vanishing = "vanishing"
+  show Other = "other"
 
 shiftLeft :: Line -> Int -> Line
 shiftLeft xs n = take (length xs) $ drop n xs ++ repeat Blank
@@ -56,26 +59,24 @@ shiftLeft xs n = take (length xs) $ drop n xs ++ repeat Blank
 shiftRight :: Line -> Int -> Line
 shiftRight xs n = take (length xs) $ replicate n Blank ++ xs
 
-detectPattern :: Set.Set Line -> Line -> Maybe Pattern
-detectPattern _     xs | all (==Blank) xs                 = Just Vanishing
-detectPattern prevs xs | Set.member xs prevs              = Just Blinking
-detectPattern prevs xs | not $ Set.disjoint prevs shifted = Just Gliding
+detectPattern :: Set.Set Line -> Line -> Pattern
+detectPattern _     xs | all (==Blank) xs                 = Vanishing
+detectPattern prevs xs | Set.member xs prevs              = Blinking
+detectPattern prevs xs | not $ Set.disjoint prevs shifted = Gliding
   where 
     shifted = Set.fromList $ [0..length xs - 1] >>= (\n -> [shiftLeft xs n, shiftRight xs n])
-detectPattern _ _ = Nothing
+detectPattern _ _ = Other
 
-depthLimit :: Int
-depthLimit = 100
-
-iterateUntilPattern :: Set.Set Line -> Line -> String
-iterateUntilPattern prevs line =
-  case pattern of
-    Just Vanishing                     -> "vanishing"
-    Just Blinking                      -> "blinking"
-    Just Gliding                       -> "gliding" 
-    _ | length nextPrevs == depthLimit -> "other"
-    _                                  -> iterateUntilPattern nextPrevs next
+evolveUntilPattern :: Line -> String
+evolveUntilPattern = evolve Set.empty >>> show
   where
-    next      = nextLine line
-    nextPrevs = Set.insert line prevs
-    pattern   = detectPattern nextPrevs next
+    evolve :: Set.Set Line -> Line -> Pattern
+    evolve prevs line =
+      case pattern of
+        Other | length prevs < depthLimit -> evolve nextPrevs next
+        _                                 -> pattern
+      where
+        pattern   = detectPattern prevs line
+        nextPrevs = Set.insert line prevs
+        next      = nextLine line
+        depthLimit = 100
