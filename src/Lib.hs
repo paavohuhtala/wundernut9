@@ -26,28 +26,27 @@ decodeCell '#' = Filled
 decodeCell '.' = Blank
 
 decodeLine :: String -> Line
-decodeLine = map decodeCell
+decodeLine = fmap decodeCell
 
 loadLines :: FilePath -> IO [Line]
-loadLines = readFile >>> fmap (lines >>> map decodeLine)
+loadLines = readFile >>> fmap (lines >>> fmap decodeLine)
 
 countNeighbors :: Line -> [Int]
-countNeighbors xs = map (filter isFilled >>> length) neighbors
+countNeighbors xs = fmap (filter isFilled >>> length) neighbors
   where
     len = length xs
     inRange i = i >= 0 && i < len
-    indices = map (\i -> filter inRange [i - 2, i -1, i + 1, i + 2]) [0 .. len - 1]
-    neighbors = map (map (xs!!)) indices
+    indices = fmap (\i -> filter inRange [i - 2, i -1, i + 1, i + 2]) [0 .. len - 1]
+    neighbors = fmap (fmap (xs!!)) indices
 
 nextCell :: (Cell, Int) -> Cell
-nextCell (Filled, 2) = Filled
-nextCell (Filled, 4) = Filled
-nextCell (Blank, 2)  = Filled
+nextCell (_, 2)      = Filled
 nextCell (Blank, 3)  = Filled
+nextCell (Filled, 4) = Filled
 nextCell _           = Blank
 
 nextLine :: Line -> Line
-nextLine xs = map nextCell $ zip xs $ countNeighbors xs
+nextLine xs = fmap nextCell $ zip xs $ countNeighbors xs
 
 data Pattern = Blinking | Gliding | Vanishing deriving (Show, Eq)
 
