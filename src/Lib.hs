@@ -45,13 +45,7 @@ nextCell _           = Blank
 nextLine :: Line -> Line
 nextLine xs = fmap nextCell $ zip xs $ countNeighbors xs
 
-data Pattern = Blinking | Gliding | Vanishing | Other deriving Eq
-
-instance Show Pattern where
-  show Blinking = "blinking"
-  show Gliding = "gliding"
-  show Vanishing = "vanishing"
-  show Other = "other"
+data Pattern = Blinking | Gliding | Vanishing | Other deriving (Show, Eq)
 
 shiftLeft :: Line -> Int -> Line
 shiftLeft xs n = take (length xs) $ drop n xs ++ repeat Blank
