@@ -65,11 +65,10 @@ evolveUntilPattern = evolve Set.empty >>> show
   where
     evolve :: Set.Set Line -> Line -> Pattern
     evolve prevs line =
-      case pattern of
+        case detectPattern prevs line of
         Other | length prevs < depthLimit -> evolve nextPrevs next
-        _                                 -> pattern
+        x                                 -> x
       where
-        pattern   = detectPattern prevs line
         nextPrevs = Set.insert line prevs
         next      = nextLine line
         depthLimit = 100
