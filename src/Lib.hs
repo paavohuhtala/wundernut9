@@ -30,12 +30,10 @@ loadLines :: FilePath -> IO [Line]
 loadLines = readFile >>> fmap (lines >>> fmap parseLine)
 
 countNeighbors :: Line -> [Int]
-countNeighbors xs = [
-  length [ () | i <- [n - 2..n + 2], inRange i, i /= n, xs !! i == Filled ]
-              | n <- [0..len - 1] ]
+countNeighbors xs = fmap countWindow $ windowed $ [Blank, Blank] ++ xs ++ [Blank, Blank]
   where
-    len = length xs
-    inRange i = i >= 0 && i < len
+    windowed = tails >>> fmap (take 5) >>> takeWhile (length >>> (==5))
+    countWindow [a, b, _, c, d] = length . filter (==Filled) $ [a, b, c, d]
 
 nextCell :: (Cell, Int) -> Cell
 nextCell (_, 2)      = Filled
