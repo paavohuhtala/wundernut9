@@ -16,6 +16,7 @@ import qualified Data.Set as Set
 import Control.Arrow
 
 data Cell = Filled | Blank deriving (Show, Eq, Ord)
+type Line = [Cell] 
 
 isFilled Filled = True
 isFilled Blank = False
@@ -24,13 +25,13 @@ decodeCell :: Char -> Cell
 decodeCell '#' = Filled
 decodeCell '.' = Blank
 
-decodeLine :: String -> [Cell]
+decodeLine :: String -> Line
 decodeLine = map decodeCell
 
-loadLines :: FilePath -> IO [[Cell]]
+loadLines :: FilePath -> IO [Line]
 loadLines = readFile >>> fmap (lines >>> map decodeLine)
 
-countNeighbors :: [Cell] -> [Int]
+countNeighbors :: Line -> [Int]
 countNeighbors xs = map (filter isFilled >>> length) neighbors
   where
     len = length xs
@@ -45,18 +46,18 @@ nextCell (Blank, 2)  = Filled
 nextCell (Blank, 3)  = Filled
 nextCell _           = Blank
 
-nextLine :: [Cell] -> [Cell]
+nextLine :: Line -> Line
 nextLine xs = map nextCell $ zip xs $ countNeighbors xs
 
 data Pattern = Blinking | Gliding | Vanishing deriving (Show, Eq)
 
-shiftLeft :: [Cell] -> Int -> [Cell]
+shiftLeft :: Line -> Int -> Line
 shiftLeft xs n = take (length xs) $ drop n xs ++ repeat Blank
 
-shiftRight :: [Cell] -> Int -> [Cell]
+shiftRight :: Line -> Int -> Line
 shiftRight xs n = take (length xs) $ replicate n Blank ++ xs
 
-detectPattern :: Set.Set [Cell] -> [Cell] -> Maybe Pattern
+detectPattern :: Set.Set Line -> Line -> Maybe Pattern
 detectPattern _     xs | all (==Blank) xs                 = Just Vanishing
 detectPattern prevs xs | Set.member xs prevs              = Just Blinking
 detectPattern prevs xs | not $ Set.disjoint prevs shifted = Just Gliding
@@ -67,7 +68,7 @@ detectPattern _ _ = Nothing
 depthLimit :: Int
 depthLimit = 100
 
-iterateUntilPattern :: Set.Set [Cell] -> [Cell] -> String
+iterateUntilPattern :: Set.Set Line -> Line -> String
 iterateUntilPattern prevs line =
   case pattern of
     Just Vanishing                     -> "vanishing"
