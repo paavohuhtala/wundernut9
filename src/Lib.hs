@@ -32,12 +32,12 @@ loadLines :: FilePath -> IO [Line]
 loadLines = readFile >>> fmap (lines >>> fmap decodeLine)
 
 countNeighbors :: Line -> [Int]
-countNeighbors xs = fmap (filter isFilled >>> length) neighbors
+countNeighbors xs = [
+  length [ () | i <- [n - 2..n + 2], inRange i, i /= n, isFilled (xs !! i) ]
+              | n <- [0..len - 1] ]
   where
     len = length xs
     inRange i = i >= 0 && i < len
-    indices = fmap (\i -> filter inRange [i - 2, i -1, i + 1, i + 2]) [0 .. len - 1]
-    neighbors = fmap (fmap (xs!!)) indices
 
 nextCell :: (Cell, Int) -> Cell
 nextCell (_, 2)      = Filled
