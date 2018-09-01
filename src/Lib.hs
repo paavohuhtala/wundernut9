@@ -1,8 +1,9 @@
 module Lib
     ( 
         Cell(..),
+        Line,
         Pattern(..),
-        loadLines,
+        parseLine,
         countNeighbors,
         nextLine,
         shiftLeft,
@@ -25,9 +26,6 @@ type Line = [Cell]
 
 parseLine :: String -> Line
 parseLine = fmap parseCell
-
-loadLines :: FilePath -> IO [Line]
-loadLines = readFile >>> fmap (lines >>> fmap parseLine)
 
 countNeighbors :: Line -> [Int]
 countNeighbors xs = fmap countWindow $ windowed $ [Blank, Blank] ++ xs ++ [Blank, Blank]
