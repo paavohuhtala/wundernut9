@@ -16,17 +16,18 @@ import qualified Data.Set as Set
 import Control.Arrow
 
 data Cell = Filled | Blank deriving (Show, Eq, Ord)
-type Line = [Cell] 
 
-decodeCell :: Char -> Cell
-decodeCell '#' = Filled
-decodeCell '.' = Blank
+parseCell :: Char -> Cell
+parseCell '#' = Filled
+parseCell '.' = Blank
 
-decodeLine :: String -> Line
-decodeLine = fmap decodeCell
+type Line = [Cell]
+
+parseLine :: String -> Line
+parseLine = fmap parseCell
 
 loadLines :: FilePath -> IO [Line]
-loadLines = readFile >>> fmap (lines >>> fmap decodeLine)
+loadLines = readFile >>> fmap (lines >>> fmap parseLine)
 
 countNeighbors :: Line -> [Int]
 countNeighbors xs = [
@@ -58,7 +59,7 @@ detectPattern _     xs | all (==Blank) xs                 = Vanishing
 detectPattern prevs xs | Set.member xs prevs              = Blinking
 detectPattern prevs xs | not $ Set.disjoint prevs shifted = Gliding
   where 
-    shifted = Set.fromList $ [0..length xs - 1] >>= (\n -> [shiftLeft xs n, shiftRight xs n])
+    shifted = Set.fromList $ [1..length xs - 1] >>= (\n -> [shiftLeft xs n, shiftRight xs n])
 detectPattern _ _ = Other
 
 evolveUntilPattern :: Line -> String
