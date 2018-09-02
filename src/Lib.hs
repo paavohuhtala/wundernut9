@@ -6,8 +6,7 @@ module Lib
         parseLine,
         countNeighbors,
         nextLine,
-        shiftLeft,
-        shiftRight,
+        shift,
         detectPattern,
         evolveUntilPattern
     ) where
@@ -44,18 +43,17 @@ nextLine xs = fmap nextCell $ zip xs $ countNeighbors xs
 
 data Pattern = Blinking | Gliding | Vanishing | Other deriving (Show, Eq)
 
-shiftLeft :: Line -> Int -> Line
-shiftLeft xs n = take (length xs) $ drop n xs ++ repeat Blank
-
-shiftRight :: Line -> Int -> Line
-shiftRight xs n = take (length xs) $ replicate n Blank ++ xs
+shift :: Line -> Int -> Line
+shift xs n = take len $ replicate n Blank ++ drop (-n) xs ++ repeat Blank 
+  where len = length xs 
 
 detectPattern :: Set.Set Line -> Line -> Pattern
 detectPattern _     xs | all (==Blank) xs                 = Vanishing
 detectPattern prevs xs | Set.member xs prevs              = Blinking
 detectPattern prevs xs | not $ Set.disjoint prevs shifted = Gliding
   where 
-    shifted = Set.fromList $ [1..length xs - 1] >>= (\n -> [shiftLeft xs n, shiftRight xs n])
+    len = length xs - 1
+    shifted = Set.fromList $ fmap (shift xs) $ [-len + 1..len - 1]
 detectPattern _ _ = Other
 
 evolveUntilPattern :: Line -> String

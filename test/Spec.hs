@@ -30,43 +30,39 @@ main = hspec $ do
       `shouldBe`
       [Blank, Blank, Blank, Blank, Filled, Blank, Filled, Filled, Filled, Blank, Blank]
 
-  describe "shiftLeft" $ do
-    it "[] 1" $ do
-      shiftLeft [] 1 `shouldBe` []
+  describe "shift" $ do
+    it "[Blank] -1" $ do
+      shift [Blank] (-1) `shouldBe` [Blank]
 
     it "[Blank] 1" $ do
-      shiftLeft [Blank] 1 `shouldBe` [Blank]
+      shift [Blank] 1 `shouldBe` [Blank]
+
+    it "[Filled] -1" $ do
+      shift [Filled] (-1) `shouldBe` [Blank]
 
     it "[Filled] 1" $ do
-      shiftLeft [Filled] 1 `shouldBe` [Blank]
+      shift [Filled] 1 `shouldBe` [Blank]
 
-    it "[Blank, Filled] 1" $ do
-      shiftLeft [Blank, Filled] 1 `shouldBe` [Filled, Blank]
-
-    it "[Blank, Blank, Filled, Blank] 2" $ do
-      shiftLeft [Blank, Blank, Filled, Blank] 2 `shouldBe` [Filled, Blank, Blank, Blank]
-
-    it "maintains the length" $ do
-        property $ \line n -> length (shiftLeft line n) == length line
-
-  describe "shiftRight" $ do
-    it "[] 1" $ do
-      shiftRight [] 1 `shouldBe` []
-
-    it "[Blank] 1" $ do
-      shiftRight [Blank] 1 `shouldBe` [Blank]
-
-    it "[Filled] 1" $ do
-      shiftRight [Filled] 1 `shouldBe` [Blank]
+    it "[Blank, Filled] -1" $ do
+      shift [Blank, Filled] (-1) `shouldBe` [Filled, Blank]
 
     it "[Filled, Blank] 1" $ do
-      shiftRight [Filled, Blank] 1 `shouldBe` [Blank, Filled]
+      shift [Filled, Blank] 1 `shouldBe` [Blank, Filled]
+
+    it "[Blank, Blank, Filled, Blank] -2" $ do
+      shift [Blank, Blank, Filled, Blank] (-2) `shouldBe` [Filled, Blank, Blank, Blank]
 
     it "[Blank, Filled, Blank, Blank] 2" $ do
-      shiftRight [Blank, Filled, Blank, Blank] 2 `shouldBe` [Blank, Blank, Blank, Filled]
+      shift [Blank, Filled, Blank, Blank] 2 `shouldBe` [Blank, Blank, Blank, Filled]
 
-    it "maintains the length" $ do
-      property $ \line n -> length (shiftRight line n) == length line
+    it "shifting [] by n returns []" $ do
+        property $ \n -> shift [] n == []
+
+    it "shifting any line by 0 returns the same line" $ do
+        property $ \line -> shift line 0 == line
+  
+    it "shifting any line by any n returns a line of the same length" $ do
+        property $ \line n -> length (shift line n) == length line
 
   describe "detectPattern" $ do
     it "vanishing sample" $ do
