@@ -52,7 +52,7 @@ detectPattern prevs xs | Set.member xs prevs              = Blinking
 detectPattern prevs xs | not $ Set.disjoint prevs shifted = Gliding
   where 
     len = length xs - 1
-    shifted = Set.fromList $ fmap (shift xs) $ [-len + 1..len - 1]
+    shifted = Set.fromList $ fmap (shift xs) [-len + 1..len - 1]
 detectPattern _ _ = Other
 
 evolveUntilPattern :: Line -> String
@@ -64,6 +64,6 @@ evolveUntilPattern = evolve Set.empty >>> show
         Other | length prevs < depthLimit -> evolve nextPrevs next
         x                                 -> x
       where
-        nextPrevs = Set.insert line prevs
-        next      = nextLine line
+        nextPrevs  = Set.insert line prevs
+        next       = nextLine line
         depthLimit = 100
