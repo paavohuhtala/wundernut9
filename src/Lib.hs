@@ -44,8 +44,7 @@ nextLine xs = fmap nextCell $ zip xs $ countNeighbors xs
 data Pattern = Blinking | Gliding | Vanishing | Other deriving (Show, Eq)
 
 shift :: Line -> Int -> Line
-shift xs n = take len $ replicate n Blank ++ drop (-n) xs ++ repeat Blank 
-  where len = length xs 
+shift xs n = take (length xs) $ replicate n Blank ++ drop (-n) xs ++ repeat Blank 
 
 detectPattern :: Set.Set Line -> Line -> Pattern
 detectPattern _     xs | all (==Blank) xs                 = Vanishing
